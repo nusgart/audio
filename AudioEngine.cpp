@@ -94,6 +94,7 @@ bool loadSound(string name, string file){
 void onExit(int numSources, Source* sources){
   bool exit = true;
   do{
+    exit = true;
     for(int i = 0; i < numSources; i++){
       //ensure that all sounds have finished playing
       if(sources[i].isPlaying())// && !sources[i].isLooping())
