@@ -59,9 +59,9 @@ int playSound(char *soundName, double x, double y, double z, double vx, double v
 int quitAudio(){
   fprintf(output, "quit\n");
   puts("Quitting Audio");
-  //int status;
-  //wait(&status);
+  int status;
   fflush(output);
+  wait(&status);
   fclose(output);
   fclose(input);
   return 0;

@@ -7,72 +7,78 @@
 using namespace std;
 
 struct Point3D{
-     double x,y,z;
+  double x,y,z;
 };
 const unsigned int MPCM=0x504d4d43;
 struct Sound{
-     unsigned int alID;
-     unsigned int format;
-     unsigned int frequency;
-     //maximum length 4GB
-     unsigned int length;
-     unsigned char* data;
+  unsigned int alID;
+  unsigned int format;
+  unsigned int frequency;
+  //maximum length 4GB
+  unsigned int length;
+  unsigned char* data;
 };
 
 struct Source{
-     unsigned int sourceID;
-     bool isPlaying() {
-	  int al_state;
-	  alGetSourcei(sourceID, AL_SOURCE_STATE, &al_state);
-	  return al_state == AL_PLAYING;
-     }
+  unsigned int sourceID;
+  bool isPlaying() {
+    int al_state;
+    alGetSourcei(sourceID, AL_SOURCE_STATE, &al_state);
+    return al_state == AL_PLAYING;
+  }
+  
+  bool isLooping(){
+    int al_looping;
+    alGetSourcei(sourceID, AL_LOOPING, &al_looping);
+    return al_looping == AL_TRUE;
+  }
 
-     void setData(Sound s, float x, float y, float z, float vx, float vy, float vz,float gain, float pitch, bool loop){
-	  alSourcei(sourceID, AL_BUFFER, s.alID);
-	  alSource3f(sourceID, AL_POSITION, x, y, z);
-	  alSource3f(sourceID, AL_VELOCITY, vx, vy, vz);
-	  alSourcef(sourceID, AL_GAIN, gain);
-	  alSourcef(sourceID, AL_PITCH, pitch);
-	  alSourcei(sourceID, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
-     }
+  void setData(Sound s, float x, float y, float z, float vx, float vy, float vz,float gain, float pitch, bool loop){
+    alSourcei(sourceID, AL_BUFFER, s.alID);
+    alSource3f(sourceID, AL_POSITION, x, y, z);
+    alSource3f(sourceID, AL_VELOCITY, vx, vy, vz);
+    alSourcef(sourceID, AL_GAIN, gain);
+    alSourcef(sourceID, AL_PITCH, pitch);
+    alSourcei(sourceID, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+  }
      
-     void play() {
-	  alSourcePlay(sourceID);
-     }
+  void play() {
+    alSourcePlay(sourceID);
+  }
 
-     void pause() {
-	  alSourcePause(sourceID);
-     }
+  void pause() {
+    alSourcePause(sourceID);
+  }
 
-     void dispose() {
-	  alDeleteSources(1, &sourceID);
-     }
+  void dispose() {
+    alDeleteSources(1, &sourceID);
+  }
 };
 
 
 map<string, Sound> soundMap;
 
 Sound loadPCMSound(FILE* soundFile){
-     unsigned int data[4];
-     Sound s;
-     //read header
-     fread(data, sizeof(int), 4, soundFile);
-     if(data[0] != MPCM){
-       //TODO FIXME: Handle error
-       cerr << "Bad Magic Number: " << data[0] << endl;
-     }
-     //setup sound
-     s.format = data[1];
-     s.frequency = data[2];
-     s.length = data[3];
-     cerr << "Magic: "<<data[0] << " frequency: " << s.frequency << " length: " << s.length ;//<< endl;
-     //read sound data
-     s.data = new unsigned char[s.length];
-     fread(s.data, sizeof(char), s.length, soundFile);
-     alGenBuffers(1, &(s.alID));
-     cerr << " Id: " << s.alID << endl;
-     alBufferData(s.alID, s.format, s.data, s.length, s.frequency);
-     return s;
+  unsigned int data[4];
+  Sound s;
+  //read header
+  fread(data, sizeof(int), 4, soundFile);
+  if(data[0] != MPCM){
+    //TODO FIXME: Handle error
+    cerr << "Bad Magic Number: " << data[0] << endl;
+  }
+  //setup sound
+  s.format = data[1];
+  s.frequency = data[2];
+  s.length = data[3];
+  cerr << "Magic: "<<data[0] << " frequency: " << s.frequency << " length: " << s.length ;//<< endl;
+  //read sound data
+  s.data = new unsigned char[s.length];
+  fread(s.data, sizeof(char), s.length, soundFile);
+  alGenBuffers(1, &(s.alID));
+  cerr << " Id: " << s.alID << endl;
+  alBufferData(s.alID, s.format, s.data, s.length, s.frequency);
+  return s;
 }
 
 bool loadSound(string name, string file){
@@ -83,6 +89,18 @@ bool loadSound(string name, string file){
   soundMap[name] = loadPCMSound(fl);
   fclose(fl);
   return true;
+}
+
+void onExit(int numSources, Source* sources){
+  bool exit = true;
+  do{
+    for(int i = 0; i < numSources; i++){
+      //ensure that all sounds have finished playing
+      if(sources[i].isPlaying())// && !sources[i].isLooping())
+	exit = false;
+    }
+  }while(!exit);
+  cout << "ALENGINE EXIT" << endl;
 }
 
 int main(int argc, char* argv[]){
@@ -160,6 +178,7 @@ int main(int argc, char* argv[]){
       }
     }else if(in.find("quit") != string::npos){
       //quit
+      onExit(numSources, sources);
       alcMakeContextCurrent(NULL);
       alcDestroyContext(context);
       alcCloseDevice(device);
@@ -168,5 +187,4 @@ int main(int argc, char* argv[]){
     }
     cerr << "AL error: " << alGetError() << endl;
   }
-  cout << "ALENGINE EXIT" << endl;
 }
