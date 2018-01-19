@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 //
 #define Read            0
 #define Write           1
@@ -31,6 +32,10 @@ int initAudio(){
     dup2(ChildRead, 0);
     dup2(ChildWrite, 1);
     execlp("./AudioEngine", "AudioEngine", (char*)NULL);
+    execlp("./audio/AudioEngine", "AudioEngine", (char*)NULL);
+    printf("Could not find AudioEngine\n");
+    fprintf(stderr, "Could not find AudioEngine\n");
+    abort();
   }else{
     //parent
     close(ChildRead);
