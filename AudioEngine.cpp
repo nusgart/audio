@@ -4,6 +4,9 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <map>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 using namespace std;
 
 struct Point3D{
@@ -105,6 +108,7 @@ void onExit(int numSources, Source* sources){
 }
 
 int main(int argc, char* argv[]){
+  kill(getppid(), SIGUSR2);
   ALCcontext *context;
   ALCdevice *device;
   const ALCchar *default_device;
