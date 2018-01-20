@@ -7,9 +7,9 @@
 extern "C"{
 #endif
 int initAudio(void);
-int loadSound(char *soundName, char *filePath);
-int playSnd(char *soundName, double x, double y, double z, float pitch, float gain);
-int playSound(char *soundName, double x, double y, double z, double vx, double vy, double vz, float pitch, float gain);
+int loadSound(const char *soundName, const char *filePath);
+int playSnd(const char *soundName, double x, double y, double z, float pitch, float gain);
+int playSound(const char *soundName, double x, double y, double z, double vx, double vy, double vz, float pitch, float gain);
 int quitAudio(void);
 
 #ifdef __cplusplus

@@ -32,10 +32,13 @@ int initAudio(){
   int write_pipe[2];
   int retI = pipe(read_pipe);
   int retO = pipe(write_pipe);
+  if(retI == -1 || retO == -1){
+    fprintf(stderr, "[AudioInterface.c] Failed to open pipe.  Unexpected behavior may follow!\n");
+  }
   cpid = fork();
   #if 1
   /// SIGNAL BLACK MAGIC
-  struct sigaction sig, sav, sav2;
+  struct sigaction sig, sav2;
   sigfillset(&sig.sa_mask);
   sig.sa_handler = _sig_handler;
   sig.sa_flags = 0;
@@ -53,7 +56,7 @@ int initAudio(){
     dup2(ChildRead, 0);
     dup2(ChildWrite, 1);
     execlp("./AudioEngine", "AudioEngine", (char*)NULL);
-    execlp("./audio/AudioEngine", "AudioEngine", (char*)NULL);
+    //execlp("./audio/AudioEngine", "AudioEngine", (char*)NULL);
     printf("Could not find AudioEngine\n");
     fprintf(stderr, "Could not find AudioEngine\n");
     abort();
@@ -66,20 +69,20 @@ int initAudio(){
   }
   return 0;
 }
-int loadSound(char *soundName, char *filePath){
+int loadSound(const char *soundName, const char *filePath){
   //
   if(!found)return -1;
   fprintf(output, "load %s %s\n", soundName, filePath);
   fflush(output);
   return 0;
 }
-int playSnd(char *soundName, double x, double y, double z, float pitch, float gain){
+int playSnd(const char *soundName, double x, double y, double z, float pitch, float gain){
   if(!found) return -1;
   fprintf(output, "playSound %s %f %f %f  %f %f %f  %f %f\n", soundName, x, y, z, 0., 0., 0., pitch, gain);
   fflush(output);
   return 0;
 }
-int playSound(char *soundName, double x, double y, double z, double vx, double vy, double vz, float pitch, float gain){
+int playSound(const char *soundName, double x, double y, double z, double vx, double vy, double vz, float pitch, float gain){
   if(!found) return -1;
   fprintf(output, "playSound %s %f %f %f  %f %f %f  %f %f\n", soundName, x, y, z, vx, vy, vz, pitch, gain);
   puts("Playing Sound");
