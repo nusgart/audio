@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <time.h>
 //
 #define Read            0
 #define Write           1
@@ -41,7 +42,7 @@ int initAudio(){
   struct sigaction sig, sav2;
   sigfillset(&sig.sa_mask);
   sig.sa_handler = _sig_handler;
-  sig.sa_flags = 0;
+  sig.sa_flags = SA_RESTART;
   sigaction(SIGUSR2, &sig, &sav2);
   #endif
   if(cpid == -1){
@@ -67,11 +68,20 @@ int initAudio(){
     input = fdopen(ParentRead, "r");
     output = fdopen(ParentWrite, "w");
   }
+  printf("Sleeping audio\n");
+  struct timeval tv;
+  tv.tv_sec = 1;
+  tv.tv_usec = 500000;
+  select(0, NULL, NULL, NULL, &tv);
+  printf("DOne\n");
   return 0;
 }
 int loadSound(const char *soundName, const char *filePath){
   //
-  if(!found)return -1;
+  if(!found){
+    printf("NOT FOUND!\n");
+    return -1;
+  }
   fprintf(output, "load %s %s\n", soundName, filePath);
   fflush(output);
   return 0;
