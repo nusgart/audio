@@ -56,7 +56,7 @@ int initAudio(){
     dup2(ChildRead, 0);
     dup2(ChildWrite, 1);
     execlp("./AudioEngine", "AudioEngine", (char*)NULL);
-    //execlp("./audio/AudioEngine", "AudioEngine", (char*)NULL);
+    execlp("./audio/AudioEngine", "AudioEngine", (char*)NULL);
     printf("Could not find AudioEngine\n");
     fprintf(stderr, "Could not find AudioEngine\n");
     abort();
