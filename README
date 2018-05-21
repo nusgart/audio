@@ -1,7 +1,9 @@
-Meta Audio Engine - Copyright (C) 2016 Nick Nusgart - All rights reserved.
-	Meta Audio engine is a simple audio engine using openal that takes commands on standard input and outputs to the sound card.
+Meta Audio Engine - Copyright (C) 2016,2017,2018- Nick Nusgart - All rights reserved.
+	Meta Audio engine is a simple audio engine using OpenAL that takes commands on standard input and outputs to the sound card.
 	All vectors are 3d vectors.
 Commands:
 *load <soundname> <soundfile> -- load a MPCM file - this is a little-endian file with the following structure - int magic = 'MPCM', int format, int frequency, int length, byte[length] data
 *playSound <soundname> <position> <velocity> <pitch> <gain> -- play a sound that has been loaded
 *quit  -- quit the engine
+
+Licensed under the MIT License
